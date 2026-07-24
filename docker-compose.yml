@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # DATABASE SERVICE
+  db:
+    image: mysql:8.0
+    container_name: medbooking-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: MedicalBookingDB
+      MYSQL_USER: meduser
+      MYSQL_PASSWORD: medpass123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/database.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+      --event-scheduler=ON
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - medbooking-network
+
+  # BACKEND SERVICE 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medbooking-backend
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/MedicalBookingDB?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: meduser
+      SPRING_DATASOURCE_PASSWORD: medpass123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - medbooking-network
+
+  # FRONTEND SERVICE
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: medbooking-frontend
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+    networks:
+      - medbooking-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  medbooking-network:
+    driver: bridge
