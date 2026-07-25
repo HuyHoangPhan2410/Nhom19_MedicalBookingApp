@@ -51,6 +51,7 @@ public class AdminPatientController {
         user.setPasswordHash(BCrypt.hashpw(body.getOrDefault("password", "password123"), BCrypt.gensalt(10)));
         user.setRole(User.Role.patient);
         user.setIsActive(true);
+        user.setEmailVerified(true);
         User savedUser = userRepository.save(user);
 
         Patient patient = new Patient();

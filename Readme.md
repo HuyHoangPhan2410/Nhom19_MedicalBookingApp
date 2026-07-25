@@ -32,3 +32,18 @@ docker compose ps
 | Bệnh nhân | patient.an@gmail.com | password123 |
 | Bệnh nhân | patient.bich@gmail.com | password123 |
 | Admin | admin@medbooking.com | password123 |
+
+## Cấu hình Gmail SMTP cho OTP
+
+1. Bật xác minh 2 bước cho tài khoản Gmail dùng để gửi email.
+2. Tạo Gmail App Password; không dùng mật khẩu đăng nhập Gmail thông thường.
+3. Tạo file `.env` từ `.env.example` và cấu hình:
+
+```env
+GMAIL_USERNAME=your_gmail@gmail.com
+GMAIL_APP_PASSWORD=your_16_character_app_password
+```
+
+4. Khởi động lại backend bằng `docker compose up --build -d`.
+
+OTP chỉ được lưu dưới dạng BCrypt hash, có hiệu lực 5 phút và được phép gửi lại tối đa 5 lần trong một giờ.

@@ -11,6 +11,11 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('patient', 'doctor', 'admin') NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    email_verified BOOLEAN NOT NULL DEFAULT TRUE,
+    email_verification_otp_hash VARCHAR(100),
+    email_verification_otp_expires_at DATETIME,
+    otp_resend_count INT NOT NULL DEFAULT 0,
+    otp_resend_window_start DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

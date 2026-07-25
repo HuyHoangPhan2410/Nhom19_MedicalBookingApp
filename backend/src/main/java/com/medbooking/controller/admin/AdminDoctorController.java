@@ -66,6 +66,7 @@ public class AdminDoctorController {
         user.setPasswordHash(BCrypt.hashpw(body.getOrDefault("password", "password123"), BCrypt.gensalt(10)));
         user.setRole(User.Role.doctor);
         user.setIsActive(true);
+        user.setEmailVerified(true);
         User savedUser = userRepository.save(user);
 
         Doctor doctor = new Doctor();

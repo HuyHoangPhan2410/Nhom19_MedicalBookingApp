@@ -47,6 +47,7 @@ public class AdminUserController {
         user.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt(10)));
         user.setRole(User.Role.valueOf(role));
         user.setIsActive(true);
+        user.setEmailVerified(true);
 
         return ApiResponse.success("Tạo tài khoản thành công", userRepository.save(user));
     }
