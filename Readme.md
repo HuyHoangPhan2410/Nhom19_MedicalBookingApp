@@ -18,15 +18,17 @@ docker compose up --build -d
 - Frontend:  http://localhost:8081
 - Backend (API):   http://localhost:8082
 - Database:  localhost:3306
-
+- Admin:http://localhost:8081/admin/login
+Email:  / Password: password123
 ### 4. Kiểm tra
 docker compose ps
 
 ## Tài khoản mẫu
 
-| Vai trò | Email | Password |
+| Role | Email | Password |
 |---------|-------|----------|
 | Bác sĩ | dr.hung@hospital.com | password123 |
 | Bác sĩ | dr.mai@hospital.com | password123 |
 | Bệnh nhân | patient.an@gmail.com | password123 |
 | Bệnh nhân | patient.bich@gmail.com | password123 |
+| Admin | admin@medbooking.com | password123 |
