@@ -44,6 +44,8 @@ services:
       SPRING_DATASOURCE_USERNAME: meduser
       SPRING_DATASOURCE_PASSWORD: medpass123
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
     depends_on:
       db:
         condition: service_healthy

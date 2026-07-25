@@ -9,7 +9,9 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: (state) => !!state.token,
     isPatient: (state) => state.user?.role === 'patient',
-    isDoctor: (state) => state.user?.role === 'doctor'
+    isDoctor: (state) => state.user?.role === 'doctor',
+    // ✅ Thêm getter admin
+    isAdmin: (state) => state.user?.role === 'admin'
   },
   actions: {
     async login(email, password) {
@@ -23,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
       return res;
     },
     async registerPatient(payload) {
-      const res = await api.post('/api/auth/register-patient', payload);
+      const res = await api.post('/api/auth/register', payload);
       if (res.status === 200 && res.data) {
         this.token = res.data.token;
         this.user = res.data;

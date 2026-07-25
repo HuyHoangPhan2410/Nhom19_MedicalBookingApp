@@ -68,7 +68,7 @@ class PaymentServiceTest {
         app.setId(appointmentId);
         payment.setAppointment(app);
         payment.setAmount(new BigDecimal("300000"));
-        payment.setPaymentMethod(Payment.PaymentMethod.momo);
+        payment.setPaymentMethod(Payment.PaymentMethod.cash);
         payment.setStatus(status);
         return payment;
     }
