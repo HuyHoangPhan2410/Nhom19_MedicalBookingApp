@@ -3,11 +3,14 @@ package com.medbooking.service.impl;
 import com.medbooking.dto.request.BookAppointmentRequest;
 import com.medbooking.dto.response.AppointmentResponse;
 import com.medbooking.entity.Appointment;
+import com.medbooking.event.AppointmentBookedEvent;
 import com.medbooking.exception.BusinessException;
 import com.medbooking.repository.AppointmentRepository;
 import com.medbooking.service.AppointmentService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -21,9 +24,12 @@ import java.util.stream.Collectors;
 public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository) {
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository,
+                                  ApplicationEventPublisher eventPublisher) {
         this.appointmentRepository = appointmentRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -54,7 +60,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new BusinessException(404, "Không tìm thấy thông tin lịch hẹn sau khi tạo"));
 
-        return mapToResponse(appointment);
+        AppointmentResponse response = mapToResponse(appointment);
+        publishBookingConfirmation(appointment);
+        return response;
     }
 
     /**
@@ -140,6 +148,27 @@ public class AppointmentServiceImpl implements AppointmentService {
     /**
      * Chuyển đổi từ Entity Appointment sang DTO AppointmentResponse.
      */
+    private void publishBookingConfirmation(Appointment appointment) {
+        if (appointment.getPatient().getUser() == null
+                || !StringUtils.hasText(appointment.getPatient().getUser().getEmail())) {
+            return;
+        }
+
+        eventPublisher.publishEvent(new AppointmentBookedEvent(
+                appointment.getId(),
+                appointment.getPatient().getUser().getEmail(),
+                appointment.getPatient().getFullName(),
+                appointment.getDoctor().getFullName(),
+                appointment.getDoctor().getSpecialty().getName(),
+                appointment.getSchedule().getWorkDate(),
+                appointment.getSchedule().getStartTime(),
+                appointment.getSchedule().getEndTime(),
+                appointment.getSymptoms(),
+                appointment.getStatus().name(),
+                appointment.getDoctor().getConsultationFee()
+        ));
+    }
+
     private AppointmentResponse mapToResponse(Appointment app) {
         AppointmentResponse res = new AppointmentResponse();
         res.setId(app.getId());
