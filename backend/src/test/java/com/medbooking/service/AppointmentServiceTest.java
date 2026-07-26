@@ -2,6 +2,7 @@ package com.medbooking.service;
 
 import com.medbooking.dto.request.BookAppointmentRequest;
 import com.medbooking.dto.response.AppointmentResponse;
+import com.medbooking.event.AppointmentBookedEvent;
 import com.medbooking.entity.*;
 import com.medbooking.exception.BusinessException;
 import com.medbooking.repository.AppointmentRepository;
@@ -9,10 +10,13 @@ import com.medbooking.service.impl.AppointmentServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.context.ApplicationEventPublisher;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -23,6 +27,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -33,6 +38,9 @@ class AppointmentServiceTest {
 
     @Mock
     private AppointmentRepository appointmentRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private AppointmentServiceImpl appointmentService;
@@ -60,6 +68,11 @@ class AppointmentServiceTest {
         assertNotNull(response, "Kết quả phản hồi không được null");
         assertEquals(100, response.getId(), "Mã lịch hẹn phải là 100");
         assertEquals("Nguyễn Văn A", response.getPatientName(), "Tên bệnh nhân phải trùng khớp");
+
+        ArgumentCaptor<AppointmentBookedEvent> eventCaptor = ArgumentCaptor.forClass(AppointmentBookedEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        assertEquals("patient@example.com", eventCaptor.getValue().recipientEmail());
+        assertEquals(new BigDecimal("500000"), eventCaptor.getValue().consultationFee());
     }
 
     @Test
@@ -157,11 +170,16 @@ class AppointmentServiceTest {
         Patient patient = new Patient();
         patient.setUserId(patientId);
         patient.setFullName("Nguyễn Văn A");
+        User patientUser = new User();
+        patientUser.setId(patientId);
+        patientUser.setEmail("patient@example.com");
+        patient.setUser(patientUser);
         app.setPatient(patient);
 
         Doctor doctor = new Doctor();
         doctor.setUserId(doctorId);
         doctor.setFullName("Bác sĩ B");
+        doctor.setConsultationFee(new BigDecimal("500000"));
         Specialty specialty = new Specialty();
         specialty.setName("Nội khoa");
         doctor.setSpecialty(specialty);
