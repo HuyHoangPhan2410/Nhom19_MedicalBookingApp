@@ -4,6 +4,11 @@ import com.medbooking.dto.request.BookAppointmentRequest;
 import com.medbooking.dto.response.ApiResponse;
 import com.medbooking.dto.response.AppointmentResponse;
 import com.medbooking.service.AppointmentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,6 +16,7 @@ import java.util.List;
 /**
  * REST Controller xử lý các yêu cầu liên quan tới lịch hẹn khám bệnh.
  */
+@Tag(name = "Appointments", description = "Appointment booking, lookup, cancellation and rescheduling")
 @RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
@@ -21,6 +27,20 @@ public class AppointmentController {
         this.appointmentService = appointmentService;
     }
 
+    @Operation(
+            summary = "Book an appointment",
+            description = "Books an available schedule through the transactional booking service.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200", description = "Appointment booked successfully",
+                    content = @Content(schema = @Schema(implementation = AppointmentResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400", description = "Invalid request or business rule violation"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404", description = "Patient, doctor or schedule not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500", description = "Internal server error")
+    })
     @PostMapping
     public ApiResponse<AppointmentResponse> bookAppointment(@RequestBody BookAppointmentRequest request) {
         AppointmentResponse response = appointmentService.bookAppointment(request);

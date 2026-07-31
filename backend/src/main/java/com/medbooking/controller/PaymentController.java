@@ -4,10 +4,12 @@ import com.medbooking.dto.request.ConfirmPaymentRequest;
 import com.medbooking.dto.response.ApiResponse;
 import com.medbooking.dto.response.PaymentResponse;
 import com.medbooking.service.PaymentService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Tag(name = "Payments", description = "Payments and Stripe PaymentIntent")
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {

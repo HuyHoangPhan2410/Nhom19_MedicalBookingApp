@@ -3,11 +3,13 @@ package com.medbooking.controller.admin;
 import com.medbooking.dto.response.ApiResponse;
 import com.medbooking.entity.Appointment;
 import com.medbooking.repository.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag(name = "Administration", description = "Admin login, dashboard and CRUD APIs")
 @RestController
 @RequestMapping("/api/admin/dashboard")
 public class AdminDashboardController {

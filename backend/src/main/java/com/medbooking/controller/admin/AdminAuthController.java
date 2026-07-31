@@ -7,8 +7,10 @@ import com.medbooking.entity.User;
 import com.medbooking.exception.BusinessException;
 import com.medbooking.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Administration", description = "Admin login, dashboard and CRUD APIs")
 @RestController
 @RequestMapping("/api/admin/auth")
 public class AdminAuthController {

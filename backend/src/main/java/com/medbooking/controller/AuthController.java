@@ -7,8 +7,10 @@ import com.medbooking.dto.request.VerifyEmailRequest;
 import com.medbooking.dto.response.ApiResponse;
 import com.medbooking.dto.response.AuthResponse;
 import com.medbooking.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Authentication", description = "Registration, email verification and login")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

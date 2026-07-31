@@ -4,11 +4,13 @@ import com.medbooking.dto.response.ApiResponse;
 import com.medbooking.entity.Specialty;
 import com.medbooking.exception.BusinessException;
 import com.medbooking.repository.SpecialtyRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Administration", description = "Admin login, dashboard and CRUD APIs")
 @RestController
 @RequestMapping("/api/admin/specialties")
 public class AdminSpecialtyController {

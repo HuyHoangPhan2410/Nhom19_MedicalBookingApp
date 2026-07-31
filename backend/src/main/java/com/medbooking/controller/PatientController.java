@@ -6,10 +6,12 @@ import com.medbooking.entity.Patient;
 import com.medbooking.exception.BusinessException;
 import com.medbooking.repository.PatientRepository;
 import com.medbooking.service.AppointmentService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Patients", description = "Patient profiles and appointment history")
 @RestController
 @RequestMapping("/api/patients")
 public class PatientController {

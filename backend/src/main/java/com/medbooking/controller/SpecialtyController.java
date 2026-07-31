@@ -3,10 +3,12 @@ package com.medbooking.controller;
 import com.medbooking.dto.response.ApiResponse;
 import com.medbooking.dto.response.SpecialtyResponse;
 import com.medbooking.service.SpecialtyService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Specialties", description = "Medical specialty lookup")
 @RestController
 @RequestMapping("/api/specialties")
 public class SpecialtyController {

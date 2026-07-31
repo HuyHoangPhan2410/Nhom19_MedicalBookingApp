@@ -4,10 +4,12 @@ import com.medbooking.dto.request.RegisterDoctorRequest;
 import com.medbooking.dto.response.ApiResponse;
 import com.medbooking.dto.response.DoctorResponse;
 import com.medbooking.service.DoctorService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Doctors", description = "Doctor lookup and registration")
 @RestController
 @RequestMapping("/api/doctors")
 public class DoctorController {

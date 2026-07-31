@@ -6,6 +6,7 @@ import com.medbooking.dto.response.ApiResponse;
 import com.medbooking.dto.response.ScheduleResponse;
 import com.medbooking.service.ScheduleService;
 import org.springframework.format.annotation.DateTimeFormat;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.util.List;
 /**
  * REST Controller quản lý các ca làm việc của bác sĩ (Hỗ trợ đầy đủ CRUD).
  */
+@Tag(name = "Schedules", description = "Doctor schedule management")
 @RestController
 @RequestMapping("/api/schedules")
 public class ScheduleController {

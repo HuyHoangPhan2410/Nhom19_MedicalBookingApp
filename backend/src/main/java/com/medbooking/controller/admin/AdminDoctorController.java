@@ -11,6 +11,7 @@ import com.medbooking.repository.SpecialtyRepository;
 import com.medbooking.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.transaction.annotation.Transactional;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Tag(name = "Administration", description = "Admin login, dashboard and CRUD APIs")
 @RestController
 @RequestMapping("/api/admin/doctors")
 public class AdminDoctorController {
