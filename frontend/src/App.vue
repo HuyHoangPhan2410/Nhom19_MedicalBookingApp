@@ -6,10 +6,10 @@ import { computed } from 'vue';
 const authStore = useAuthStore();
 const route = useRoute();
 
-// ✅ Ẩn header/footer khi ở trang admin hoặc doctor dashboard
+// Chỉ ẩn header/footer ở các trang quản trị.
 const isAdminPage = computed(() => route.path.startsWith('/admin'));
-const isDoctorDashboard = computed(() => route.path === '/doctor-dashboard');
-const hideChrome = computed(() => isAdminPage.value || isDoctorDashboard.value);
+// Bác sĩ vẫn thấy thanh điều hướng để quay lại trang chủ.
+const hideChrome = computed(() => isAdminPage.value);
 </script>
 
 <template>
@@ -18,7 +18,7 @@ const hideChrome = computed(() => isAdminPage.value || isDoctorDashboard.value);
       <div class="header-content">
         <RouterLink to="/" class="logo">🏥 MedBooking</RouterLink>
         <nav class="nav-links">
-          <RouterLink to="/">Trang chủ</RouterLink>
+          <RouterLink to="/" :class="{ 'back-home-link': authStore.isDoctor }">{{ authStore.isDoctor ? '← Quay lại trang chủ' : 'Trang chủ' }}</RouterLink>
           <template v-if="authStore.isAuthenticated">
             <RouterLink v-if="authStore.isPatient" to="/profile">Hồ sơ của tôi</RouterLink>
             <RouterLink v-if="authStore.isDoctor" to="/doctor-dashboard">Quản lý lịch khám</RouterLink>
@@ -77,6 +77,19 @@ const hideChrome = computed(() => isAdminPage.value || isDoctorDashboard.value);
 }
 .nav-links a:hover, .nav-links a.router-link-active {
   color: var(--primary);
+}
+.back-home-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius-md);
+  background: var(--primary-light);
+  color: var(--primary) !important;
+}
+.back-home-link:hover {
+  background: var(--primary);
+  color: #ffffff !important;
 }
 .btn-login {
   background: var(--primary) !important;
