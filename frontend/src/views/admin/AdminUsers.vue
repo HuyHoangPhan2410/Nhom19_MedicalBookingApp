@@ -36,10 +36,26 @@
             <option value="patient">patient</option><option value="doctor">doctor</option><option value="admin">admin</option>
           </select>
         </div>
+
+        <div v-if="form.role === 'doctor'" class="doctor-profile-fields">
+          <p class="profile-note">Can day du ho so bac si de tai khoan co the dang ky ca lam.</p>
+          <div class="form-grid">
+            <div class="form-group full-width"><label>Ho ten bac si</label><input v-model="form.fullName" class="form-control" /></div>
+            <div class="form-group"><label>Chuyen khoa</label>
+              <select v-model="form.specialtyId" class="form-control">
+                <option value="" disabled>Chon chuyen khoa</option>
+                <option v-for="s in specialties" :key="s.id" :value="String(s.id)">{{ s.name }}</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Kinh nghiem (nam)</label><input v-model.number="form.experienceYears" type="number" min="0" class="form-control" /></div>
+            <div class="form-group"><label>Gia kham (VND)</label><input v-model.number="form.consultationFee" type="number" min="0" class="form-control" /></div>
+            <div class="form-group full-width"><label>Gioi thieu</label><textarea v-model="form.bio" rows="2" class="form-control"></textarea></div>
+          </div>
+        </div>
         <div v-if="errorMsg" class="error-banner">{{ errorMsg }}</div>
         <div class="modal-actions">
           <button @click="showModal = false" class="btn btn-outline">Hủy</button>
-          <button @click="handleSave" class="btn btn-primary">Lưu</button>
+          <button @click="handleSave" class="btn btn-primary" :disabled="saving">Lưu</button>
         </div>
       </div>
     </div>
@@ -51,43 +67,95 @@ import { ref, onMounted } from 'vue';
 import api from '../../api/axios';
 
 const users = ref([]);
+const specialties = ref([]);
 const showModal = ref(false);
 const editingId = ref(null);
 const errorMsg = ref('');
-const form = ref({ email: '', password: '', role: 'patient' });
+const saving = ref(false);
+const emptyForm = () => ({ email: '', password: '', role: 'patient', fullName: '', specialtyId: '', experienceYears: 0, consultationFee: 300000, bio: '' });
+const form = ref(emptyForm());
 
-const fetchUsers = async () => {
-  const res = await api.get('/api/admin/users');
-  if (res.status === 200) users.value = res.data;
+const fetchData = async () => {
+  const [userRes, specialtyRes] = await Promise.all([
+    api.get('/api/admin/users'),
+    api.get('/api/admin/specialties')
+  ]);
+  if (userRes.status === 200) users.value = userRes.data;
+  if (specialtyRes.status === 200) specialties.value = specialtyRes.data;
 };
-onMounted(fetchUsers);
+onMounted(fetchData);
 
-const openCreate = () => { editingId.value = null; form.value = { email: '', password: '', role: 'patient' }; errorMsg.value = ''; showModal.value = true; };
-const openEdit = (u) => { editingId.value = u.id; form.value = { email: u.email, password: '', role: u.role }; errorMsg.value = ''; showModal.value = true; };
+const openCreate = () => { editingId.value = null; form.value = emptyForm(); errorMsg.value = ''; showModal.value = true; };
+const openEdit = async (u) => {
+  editingId.value = u.id;
+  form.value = { ...emptyForm(), email: u.email, role: u.role };
+  errorMsg.value = '';
+  showModal.value = true;
+  if (u.role !== 'doctor') return;
+
+  try {
+    const res = await api.get(`/api/admin/doctors/${u.id}`);
+    if (res.status === 200) {
+      form.value.fullName = res.data.fullName;
+      form.value.specialtyId = String(res.data.specialtyId);
+      form.value.experienceYears = res.data.experienceYears;
+      form.value.consultationFee = res.data.consultationFee;
+      form.value.bio = res.data.bio || '';
+      return;
+    }
+  } catch (_) {
+    // Accounts converted by the old flow can be missing a Doctors record.
+  }
+
+  try {
+    const patientRes = await api.get(`/api/admin/patients/${u.id}`);
+    if (patientRes.status === 200) form.value.fullName = patientRes.data.fullName || '';
+  } catch (_) {
+    // Admin can enter the doctor name manually.
+  }
+};
 
 const handleSave = async () => {
   errorMsg.value = '';
+  if (form.value.role === 'doctor' && !form.value.specialtyId) {
+    errorMsg.value = 'Vui long chon chuyen khoa cho bac si.';
+    return;
+  }
+  saving.value = true;
   try {
+    const payload = { email: form.value.email, role: form.value.role };
+    if (form.value.password) payload.password = form.value.password;
+    if (form.value.role === 'doctor') {
+      Object.assign(payload, {
+        fullName: form.value.fullName,
+        specialtyId: String(form.value.specialtyId),
+        experienceYears: String(form.value.experienceYears ?? 0),
+        consultationFee: String(form.value.consultationFee ?? 0),
+        bio: form.value.bio || ''
+      });
+    }
     if (editingId.value) {
-      const payload = { email: form.value.email, role: form.value.role };
-      if (form.value.password) payload.password = form.value.password;
       await api.put(`/api/admin/users/${editingId.value}`, payload);
     } else {
-      await api.post('/api/admin/users', form.value);
+      await api.post('/api/admin/users', payload);
     }
     showModal.value = false;
-    await fetchUsers();
-  } catch (e) { errorMsg.value = e.message; }
+    await fetchData();
+  } catch (e) {
+    errorMsg.value = e.message;
+  } finally {
+    saving.value = false;
+  }
 };
 
 const toggleActive = async (u) => {
   await api.put(`/api/admin/users/${u.id}`, { isActive: String(!u.isActive) });
-  await fetchUsers();
+  await fetchData();
 };
 
 const handleDelete = async (u) => {
   if (!confirm(`Xóa tài khoản ${u.email}?`)) return;
-  try { await api.delete(`/api/admin/users/${u.id}`); await fetchUsers(); } catch (e) { alert(e.message); }
+  try { await api.delete(`/api/admin/users/${u.id}`); await fetchData(); } catch (e) { alert(e.message); }
 };
 </script>
 
@@ -109,6 +177,11 @@ const handleDelete = async (u) => {
 .form-group { margin-bottom: 1rem; }
 .form-group label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; }
 .form-control { width: 100%; padding: 0.6rem 0.8rem; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; outline: none; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 0.75rem; }
+.full-width { grid-column: 1 / -1; }
+.doctor-profile-fields { border-top: 1px solid #e2e8f0; margin-top: 1rem; padding-top: 1rem; }
+.profile-note { margin: 0 0 0.8rem; padding: 0.55rem 0.7rem; background: #ecfeff; color: #0f766e; border-radius: 8px; font-size: 0.82rem; }
+textarea.form-control { resize: vertical; }
 .error-banner { background: #ffe4e6; color: #be123c; padding: 0.5rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
 </style>
